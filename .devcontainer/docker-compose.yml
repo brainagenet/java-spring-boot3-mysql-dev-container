@@ -1,23 +1,19 @@
 version: '3.8'
 
-volumes:
-  postgres-data:
-
 services:
   app:
-    container_name: javadev
     build: 
-      context: .
-      dockerfile: Dockerfile
-    environment:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    # environment:
       # NOTE: POSTGRES_DB/USER/PASSWORD should match values in db container
-        POSTGRES_PASSWORD: postgres
-        POSTGRES_USER: postgres
-        POSTGRES_DB: postgres
-        POSTGRES_HOSTNAME: postgresdb
+        # POSTGRES_PASSWORD: postgres
+        # POSTGRES_USER: postgres
+        # POSTGRES_DB: postgres
+        # POSTGRES_HOSTNAME: postgresdb
 
     volumes:
-      - ../..:/workspaces:cached
+      - ..:/workspaces:cached
       
     # Overrides default command so things don't shut down after the process ends.
     command: sleep infinity
@@ -29,16 +25,24 @@ services:
     # (Adding the "ports" property to this file will not forward from a Codespace.)
 
   db:
-    container_name: postgresdb
-    image: postgres:latest
+    image: mysql
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --lower_case_table_names=1
     restart: unless-stopped
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - mysql-data:/var/lib/mysql
     environment:
-      # NOTE: POSTGRES_DB/USER/PASSWORD should match values in app container
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_USER: postgres
-      POSTGRES_DB: postgres
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_ROOT_PASSWORD: '!s2cr@t'
+      MYSQL_DATABASE: 'testdb'
+      MYSQL_USER: 'test'
+      MYSQL_PASSWORD: '!test#12'
 
     # Add "forwardPorts": ["5432"] to **devcontainer.json** to forward PostgreSQL locally.
     # (Adding the "ports" property to this file will not forward from a Codespace.)
+
+volumes:
+  mysql-data:
